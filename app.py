@@ -1,7 +1,6 @@
 from flask import Flask, request, render_template, redirect, url_for
 import os
 import pickle
-from sklearn.preprocessing import StandardScaler
 import librosa as lr  # biblioteka do przetwarzania audio
 import numpy as np
 import pandas as pd
@@ -152,12 +151,7 @@ def predict_numerical(song_path, numerical_model_name):
     numerical_features = pd.read_csv(f"{numerical_features_path}.csv")
     numerical_features = scaler.transform(numerical_features)
 
-    print("XSXSXS")
-    print(numerical_features)
-    print(numerical_features.shape)
     result = model.predict(numerical_features)[0]
-    print(result)
-    print(type(result))
     if isinstance(result, np.int32):
         genres = ['blues', 'classical', 'country', 'disco', 'hip-hop', 'jazz', 'metal', 'pop', 'reggae', 'rock']
         return genres[result]
