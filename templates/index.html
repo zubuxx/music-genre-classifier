@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Music Genre Classification</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+    <div class="container mt-5">
+        <h2 class="mb-4">Music Genre Classification</h2>
+        <form action="/" method="post" enctype="multipart/form-data" class="mb-3">
+            <div class="mb-3">
+                <label for="file">Upload a MP3 File</label>
+                <input type="file" name="file" class="form-control">
+            </div>
+
+            <div class="mb-3 form-check">
+                <input type="checkbox" class="form-check-input" {% if use_all_models %} checked {% endif %} id="all_models" name="all_models">
+                <label class="form-check-label" for="all_models">Use all models</label>
+            </div>
+            <div class="mb-3" id="modelTypeSelectDiv">
+                <label for="modelTypeSelect" class="form-label">Prediction based on</label>
+                <select id="modelTypeSelect" name="model_type" class="form-select" onchange="updateModelList()">
+                    <option value="numerical_features">numerical features</option>
+                    <option value="spectogram">spectogram</option>
+                </select>
+            </div>
+            <div class="mb-3" id="model_numerical">
+                <label for="model_numerical" class="form-label">Choose model</label>
+                <select name="model_numerical" class="form-select">
+                    {% for model in numerical_models %}
+                        <option value="{{ model }}">{{ model }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="mb-3" id="model_spectogram">
+                <label for="model_spectogram" class="form-label">Choose model</label>
+                <select name="model_spectogram" class="form-select">
+                    {% for model in spectogram_models %}
+                        <option value="{{ model }}">{{ model }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <button type="submit" class="btn btn-primary">Predict</button>
+        </form>
+        {% if result is not none %}
+        <div class="mb-3">
+            <h4>Result:</h4>
+            {% for res in result %}
+            <p>
+                <b>{{ res[0] }}</b>: {{ res[1] }}
+            </p>
+            {% endfor %}
+        </div>
+        {% endif %}
+    </div>
+    <!-- Bootstrap JS Bundle with Popper -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.0/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script>
+        const checkbox = document.getElementById('all_models');
+        const selectedTypeBox = document.getElementById('modelTypeSelectDiv');
+
+        function updateModelList() {
+        const selectedType = document.getElementById('modelTypeSelect').value;
+
+        // Pobranie wybranego typu modelu
+
+        // Pobranie elementu dropdown, który będzie aktualizowany
+        const modelNumericalBox = document.getElementById('model_numerical');
+        const modelSpectogramBox = document.getElementById('model_spectogram');
+        
+        if (checkbox.checked) {
+            modelNumericalBox.style.display = 'none';
+            modelSpectogramBox.style.display = 'None';
+            selectedTypeBox.style.display = 'None';
+    } else {
+
+        if (selectedType === 'numerical_features') {
+            modelNumericalBox.style.display = 'block';
+            modelSpectogramBox.style.display = 'None';
+        } else {
+            modelNumericalBox.style.display = 'none';
+            modelSpectogramBox.style.display = 'block';
+        }
+    }
+
+    }
+    document.addEventListener('DOMContentLoaded', updateModelList);
+
+    
+    checkbox.addEventListener('change', function() {
+
+    const modelNumericalBox = document.getElementById('model_numerical');
+    const modelSpectogramBox = document.getElementById('model_spectogram');
+
+
+    if(this.checked) {
+        modelNumericalBox.style.display = 'none';
+        modelSpectogramBox.style.display = 'None';
+        selectedTypeBox.style.display = 'None';
+        // selectedType.style.display = 'None';
+    } else {
+        const selectedType = document.getElementById('modelTypeSelect').value;
+        selectedTypeBox.style.display = 'block'
+        // Kod do wykonania, gdy checkbox jest odznaczony
+        if (selectedType === 'numerical_features') {
+            modelNumericalBox.style.display = 'block';
+            modelSpectogramBox.style.display = 'None';
+        } else {
+            modelNumericalBox.style.display = 'none';
+            modelSpectogramBox.style.display = 'block';
+        }
+    }
+});
+    
+    </script>
+
+</body>
+</html>
