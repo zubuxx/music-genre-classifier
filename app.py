@@ -7,6 +7,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import matplotlib
 from keras import models, preprocessing, Sequential, layers
+from keras.models import load_model
 import time
 matplotlib.use('agg')
 
@@ -29,7 +30,7 @@ def load_models():
                         for f in os.listdir(app.config['NUMERICAL_FEATURES_MODEL_FOLDER']) if f.endswith('.pkl')}
     
     spectogram_models = {f.split('.')[0]: os.path.join(app.config['SPECTOGRAM_MODEL_FOLDER'], f)
-                         for f in os.listdir(app.config['SPECTOGRAM_MODEL_FOLDER']) if f.endswith('.pkl')}
+                         for f in os.listdir(app.config['SPECTOGRAM_MODEL_FOLDER']) if f.endswith('.keras')}
     return numerical_models, spectogram_models
 
 
@@ -160,9 +161,12 @@ def predict_numerical(song_path, numerical_model_name):
 
 def predict_spectogram(song_path, spectogram_model_name):
     model_path = os.path.join(app.config['SPECTOGRAM_MODEL_FOLDER'], spectogram_model_name)
-    with open(f'{model_path}.pkl', 'rb') as f:
-        model = pickle.load(f)
+    # with open(f'{model_path}.pkl', 'rb') as f:
+    #     model = pickle.load(f)
 
+
+    # model.save(f"{model_path}.keras")
+    model = load_model(f'{model_path}.keras')
 
     song_name = os.path.splitext(os.path.basename(song_path))[0]
 
