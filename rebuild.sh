@@ -13,4 +13,4 @@ docker rmi genre-class-app
 docker build -t genre-class-app .
 
 # Uruchom aplikację w kontenerze na porcie 5000
-docker run  -p 5000:5000 genre-class-app
+docker run -d -p 5000:5000 genre-class-app
