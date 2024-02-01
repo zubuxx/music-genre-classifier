@@ -1,7 +1,7 @@
 from flask import Flask, request, render_template, redirect, url_for
 import os
 import pickle
-import librosa as lr  # biblioteka do przetwarzania audio
+import librosa as lr
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
@@ -13,10 +13,10 @@ matplotlib.use('agg')
 
 
 app = Flask(__name__)
-app.config['UPLOAD_FOLDER'] = 'uploads'  # folder na przesłane pliki
-app.config['NUMERICAL_FEATURES_FOLDER'] = 'uploads/numerical_features'  # folder na przesłane pliki
-app.config['SPECTOGRAMS_FOLDER'] = 'uploads/spectograms'  # folder na przesłane pliki
-app.config['ALLOWED_EXTENSIONS'] = {'mp3'}  # dozwolone rozszerzenia plików
+app.config['UPLOAD_FOLDER'] = 'uploads'  # directory for uploaded files
+app.config['NUMERICAL_FEATURES_FOLDER'] = 'uploads/numerical_features' 
+app.config['SPECTOGRAMS_FOLDER'] = 'uploads/spectograms'
+app.config['ALLOWED_EXTENSIONS'] = {'mp3'}  # allowed file extensions
 app.config['MODEL_FOLDER'] = 'models'
 
 app.config['NUMERICAL_FEATURES_MODEL_FOLDER'] = 'models/numerical_features'
@@ -24,7 +24,7 @@ app.config['SPECTOGRAM_MODEL_FOLDER'] = 'models/spectograms'
 app.config['PREPROCESSING_FOLDER'] = 'models/preprocessing'
 app.config['TF_ENABLE_ONEDNN_OPTS'] = 0
 
-# Wczytywanie dostępnych modeli
+# Loading available models
 def load_models():
     numerical_models = {f.split('.')[0]: os.path.join(app.config['NUMERICAL_FEATURES_MODEL_FOLDER'], f)
                         for f in os.listdir(app.config['NUMERICAL_FEATURES_MODEL_FOLDER']) if f.endswith('.pkl')}
@@ -35,11 +35,11 @@ def load_models():
 
 
 
-# Funkcja sprawdzająca rozszerzenie pliku
+# Checking file extension
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in app.config['ALLOWED_EXTENSIONS']
 
-# Strona główna z formularzem
+# Main page
 @app.route('/', methods=['GET', 'POST'])
 def upload_file():
     # models = load_models()
@@ -78,9 +78,8 @@ def upload_file():
                 genre_result = [genre_result]
     return render_template('index.html', numerical_models=numerical_models.keys(), spectogram_models=spectogram_models.keys(), result=genre_result, use_all_models = use_all_models)
 
-# Funkcja do predykcji gatunku
+# Prediction genre
 def predict_genre(file_path, model_type, model_numerical, model_spectogram):
-    # Ładowanie modelu (przykład, dostosuj ścieżkę i nazwę pliku)
     if model_type == "numerical_features":
         model_name = model_numerical
         result = predict_numerical(file_path, model_numerical)
@@ -93,7 +92,6 @@ def predict_genre(file_path, model_type, model_numerical, model_spectogram):
 
 def process_numerical_features(song_path):
 
-     # TODO: check if correct 
     seconds = 29
 
     colnames = ['chroma_stft', 'spectral_centorid', 'spectral_bandwidth', 'spectral_rolloff', 'zero_crossing_rate']
@@ -125,8 +123,6 @@ def process_spectogram(song_path):
     song_name = os.path.splitext(os.path.basename(song_path))[0]
     spectogram_path = os.path.join(app.config['SPECTOGRAMS_FOLDER'], song_name)
 
-    # spectrogram_dir = f"../../spectrograms/{genre}/{filename.replace('.mp3', '.png')}"
-
     if not os.path.isfile(spectogram_path):
         signal, sr = lr.load(song_path)
         mel_spectrogram = lr.feature.melspectrogram(y=signal, sr=sr)
@@ -136,13 +132,9 @@ def process_spectogram(song_path):
 
 
 def predict_numerical(song_path, numerical_model_name):
-
     scaler_path = os.path.join(app.config['PREPROCESSING_FOLDER'], "scaler.pkl")
-
-
     with open(scaler_path, "rb") as file:
         scaler = pickle.load(file)
-   
     model_path = os.path.join(app.config['NUMERICAL_FEATURES_MODEL_FOLDER'], numerical_model_name)
     with open(f'{model_path}.pkl', 'rb') as f:
         model = pickle.load(f)
@@ -161,11 +153,6 @@ def predict_numerical(song_path, numerical_model_name):
 
 def predict_spectogram(song_path, spectogram_model_name):
     model_path = os.path.join(app.config['SPECTOGRAM_MODEL_FOLDER'], spectogram_model_name)
-    # with open(f'{model_path}.pkl', 'rb') as f:
-    #     model = pickle.load(f)
-
-
-    # model.save(f"{model_path}.keras")
     model = load_model(f'{model_path}.keras')
 
     song_name = os.path.splitext(os.path.basename(song_path))[0]
@@ -190,4 +177,4 @@ def predict_spectogram(song_path, spectogram_model_name):
 
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(debug=False)
